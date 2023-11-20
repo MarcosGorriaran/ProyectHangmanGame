@@ -6,16 +6,16 @@ namespace HangingGame
     {
         public static void Main()
         {
-            const ConsoleColor ErrorColor = ConsoleColor.Red, WelcomeColor = ConsoleColor.Green;
-            const ConsoleColor CorrectBackground = ConsoleColor.Green;
-            const ConsoleColor WrongBackground = ConsoleColor.Red;
-            const ConsoleColor BlackForWhiteBackground = ConsoleColor.Black;
+            const ConsoleColor ErrorColor = ConsoleColor.Red, WelcomeColor = ConsoleColor.Green, CorrectBackground = ConsoleColor.Green, WrongBackground = ConsoleColor.Red, BlackForWhiteBackground = ConsoleColor.Black;
             const string WelcomeMsg = "***************************************\n*********Bienvenid@ AL AHORCADO********\n***************************************";
             const string MainMenuAsk = "Por favor, escoge el nivel de dificultad:";
             const string MainMenuOptions = "A. Facil\nB. Normal\nC. Dificil\nD. Experto\nE. Exit";
             const string MainMenuAskValue = "Elige una opcion: ";
             const string OptionOutsideRange = "La opcion seleccionada esta fuera del rango permitido";
+            const string GameOptionOtusideRange = "La letra que ha seleccionado no esta dentro de la lista de caracteres posibles";
+            const string CharacterAlreadyUsed = "La letra seleccionada ya esta siendo utilizado";
             const string ShowLeftAttemtps = "Le quedan {0} intentos";
+            const string AskLetter = "Proporcioname con la letra que deseas probar: ";
             const string LetterOptions = "ABCDEFGHIJKLMNOPKRSTWXYZ";
             const char EmptyWords = '_';
             const char LetterOptionSpliter = ' ';
@@ -34,7 +34,8 @@ namespace HangingGame
                                  };
             string guessWord, showWords;
             char[] usedCharacters;
-            int option, attemptReducer, attempts;
+            char optionWord;
+            int option,gameOption, attemptReducer, attempts;
             bool repeat, found;
 
             Console.ForegroundColor = WelcomeColor;
@@ -108,11 +109,48 @@ namespace HangingGame
                                 Console.WriteLine();
                             }
                         }
+                        Console.WriteLine();
+                        Console.WriteLine(showWords);
                         Console.WriteLine(hangmans[attempts-1]);
+                        found = false;
+                        repeat = false;
                         do
                         {
-
+                            if (repeat)
+                            {
+                                Console.ForegroundColor = ErrorColor;
+                                Console.WriteLine(found ? CharacterAlreadyUsed : GameOptionOtusideRange);
+                                Console.ResetColor();
+                            }
+                            Console.Write(AskLetter);
+                            gameOption = Convert.ToInt32(Console.ReadLine().Trim().ToUpper()[0]);
+                            int i = 0;
+                            while ((gameOption < UTFAWord || gameOption > UTFZWord) && i<usedCharacters.Length && !found)
+                            {
+                                found = Convert.ToInt32(usedCharacters[i])==gameOption;
+                                i++;
+                            }
+                        } while ((gameOption<UTFAWord || gameOption>UTFZWord) && found);
+                        optionWord = Convert.ToChar(gameOption);
+                        char[] aux = showWords.ToCharArray();
+                        found = false;
+                        for(int i = 0; guessWord.IndexOf(optionWord, i) != -1; i++)
+                        {
+                            found = true;
+                            aux[guessWord.IndexOf(optionWord, i)] = guessWord[guessWord.IndexOf(optionWord, i)];
                         }
+                        if (!found)
+                        {
+                            attempts--;
+                        }
+                        showWords = new string(aux);
+                        aux = usedCharacters;
+                        usedCharacters = new char[usedCharacters.Length+1];
+                        for(int i = 0; i < usedCharacters.Length-1; i++)
+                        {
+                            usedCharacters[i] = aux[i];
+                        }
+                        usedCharacters[usedCharacters.Length-1] = optionWord;
                     }
                 }
             }while (option!=ExitOption);
