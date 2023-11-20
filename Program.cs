@@ -7,16 +7,20 @@ namespace HangingGame
         public static void Main()
         {
             const ConsoleColor ErrorColor = ConsoleColor.Red, WelcomeColor = ConsoleColor.Green, CorrectBackground = ConsoleColor.Green, WrongBackground = ConsoleColor.Red, BlackForWhiteBackground = ConsoleColor.Black;
+            const ConsoleColor WinColor = ConsoleColor.Green, LoseColor = ConsoleColor.Yellow, HangmanColor = ConsoleColor.Cyan;
             const string WelcomeMsg = "***************************************\n*********Bienvenid@ AL AHORCADO********\n***************************************";
+            const string GoodbyeMsg = "***************************************\n*************Adios jugador@************\n***************************************";
             const string MainMenuAsk = "Por favor, escoge el nivel de dificultad:";
             const string MainMenuOptions = "A. Facil\nB. Normal\nC. Dificil\nD. Experto\nE. Exit";
             const string MainMenuAskValue = "Elige una opcion: ";
             const string OptionOutsideRange = "La opcion seleccionada esta fuera del rango permitido";
             const string GameOptionOtusideRange = "La letra que ha seleccionado no esta dentro de la lista de caracteres posibles";
-            const string CharacterAlreadyUsed = "La letra seleccionada ya esta siendo utilizado";
-            const string ShowLeftAttemtps = "Le quedan {0} intentos";
+            const string CharacterAlreadyUsed = "La letra seleccionada ya ha sido utilizado";
+            const string ShowLeftAttemtps = "Le queda {0} intentos";
             const string AskLetter = "Proporcioname con la letra que deseas probar: ";
             const string LetterOptions = "ABCDEFGHIJKLMNOPKRSTWXYZ";
+            const string PlayerWins = "Has acertado la palabra, esta era: ";
+            const string PlayerLoses = "No has conseguido acertar la palabra antes del limite de intentos, la palabra era: ";
             const char EmptyWords = '_';
             const char LetterOptionSpliter = ' ';
             const char LineJumper = '\n', SectionSpliter = '-';
@@ -70,6 +74,7 @@ namespace HangingGame
                 
                 if (option != ExitOption)
                 {
+                    //Seting Up the game
                     attemptReducer = option switch
                     {
                         EasyMode => EasyAttemptsReducer,
@@ -81,9 +86,9 @@ namespace HangingGame
                     guessWord = hangmanWords[option];
                     showWords = new string(EmptyWords, guessWord.Length);
                     usedCharacters = new char[0];
-                    while (attempts > 0)
+                    //The game
+                    while (attempts > 0 && showWords.Contains(EmptyWords))
                     {
-                        //The game
                         Console.WriteLine(new string(SectionSpliter, Console.WindowWidth));
                         Console.WriteLine(ShowLeftAttemtps, attempts);
                         //Building Keyboard
@@ -109,9 +114,19 @@ namespace HangingGame
                                 Console.WriteLine();
                             }
                         }
+                        //Showing correct words
                         Console.WriteLine();
-                        Console.WriteLine(showWords);
+                        foreach (char i in showWords.ToCharArray())
+                        {
+                            Console.Write(i);
+                            Console.Write(LetterOptionSpliter);
+                        }
+                        Console.WriteLine();
+                        Console.ForegroundColor = HangmanColor;
                         Console.WriteLine(hangmans[attempts-1]);
+                        Console.ResetColor();
+
+                        //Asking and validating
                         found = false;
                         repeat = false;
                         do
@@ -122,15 +137,19 @@ namespace HangingGame
                                 Console.WriteLine(found ? CharacterAlreadyUsed : GameOptionOtusideRange);
                                 Console.ResetColor();
                             }
+                            repeat = true;
                             Console.Write(AskLetter);
                             gameOption = Convert.ToInt32(Console.ReadLine().Trim().ToUpper()[0]);
                             int i = 0;
-                            while ((gameOption < UTFAWord || gameOption > UTFZWord) && i<usedCharacters.Length && !found)
+                            found = false;
+                            while ((gameOption >= UTFAWord && gameOption <= UTFZWord) && i<usedCharacters.Length && !found)
                             {
                                 found = Convert.ToInt32(usedCharacters[i])==gameOption;
                                 i++;
                             }
-                        } while ((gameOption<UTFAWord || gameOption>UTFZWord) && found);
+                        } while ((gameOption<UTFAWord || gameOption>UTFZWord) || found);
+
+                        //Changin status of game
                         optionWord = Convert.ToChar(gameOption);
                         char[] aux = showWords.ToCharArray();
                         found = false;
@@ -152,8 +171,21 @@ namespace HangingGame
                         }
                         usedCharacters[usedCharacters.Length-1] = optionWord;
                     }
+                    Console.ForegroundColor = attempts > 0 ? WinColor : LoseColor;
+                    Console.WriteLine((attempts>0 ? PlayerWins : PlayerLoses)+guessWord);
+                    Console.ResetColor();
                 }
             }while (option!=ExitOption);
+
+            //Goodbye messege
+            Console.WriteLine(new string(SectionSpliter, Console.WindowWidth));
+            Console.ForegroundColor = WelcomeColor;
+            for (int i = 0; i < GoodbyeMsg.Split(LineJumper).Length; i++)
+            {
+                Console.SetCursorPosition((Console.WindowWidth - GoodbyeMsg.Split(LineJumper)[i].Length) / Spliter, Console.CursorTop);
+                Console.WriteLine(GoodbyeMsg.Split(LineJumper)[i]);
+            }
+            Console.ResetColor();
         }
     }
 }
