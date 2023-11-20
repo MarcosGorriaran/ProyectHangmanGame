@@ -1,4 +1,10 @@
-﻿using System;
+﻿/*
+ * Alumne: Gorriaran Caamaño Marcos
+ * M03. Programacio UF1 
+ * v1. 20/11/2023
+ * Proyect Hangman       
+ */
+using System;
 
 namespace HangingGame
 {
