@@ -22,6 +22,7 @@ namespace HangingGame
             const string OptionOutsideRange = "La opcion seleccionada esta fuera del rango permitido";
             const string ProvideHangmanText = "Necesito un texto que no tenga mas de {0} vocales diferentes: ";
             const string WordHasTooManyVocals = "La palabra que ha seleccionado tiene {0} vocales diferentes y se esperaba que solo tuviera {1} vocal diferente";
+            const string NotAllowedWordInHangmanWord = "La palabra solo puede contener caracteres entre el A y el Z";
             const string GameOptionOtusideRange = "La letra que ha seleccionado no esta dentro de la lista de caracteres posibles";
             const string CharacterAlreadyUsed = "La letra seleccionada ya ha sido utilizado";
             const string ShowLeftAttemtps = "Le queda {0} intentos";
@@ -48,7 +49,7 @@ namespace HangingGame
             char[] usedCharacters;
             char optionWord;
             int option, gameOption, attemptReducer, attempts, vocalCount, maxVocalAllowed;
-            bool repeat, found;
+            bool repeat, found = false;
 
             Console.ForegroundColor = WelcomeColor;
             for (int i = 0; i < WelcomeMsg.Split(LineJumper).Length; i++)
@@ -114,21 +115,39 @@ namespace HangingGame
                         if (repeat)
                         {
                             Console.ForegroundColor = ErrorColor;
-                            Console.WriteLine(WordHasTooManyVocals, vocalCount, maxVocalAllowed);
+                            if (found)
+                            {
+                                Console.WriteLine(NotAllowedWordInHangmanWord);
+                            }
+
+                            if (vocalCount > maxVocalAllowed)
+                            {
+                                Console.WriteLine(WordHasTooManyVocals, vocalCount, maxVocalAllowed);
+                            }
                             Console.ResetColor();
                         }
                         repeat = true;
                         Console.Write(ProvideHangmanText, maxVocalAllowed);
                         guessWord = Console.ReadLine().Trim().ToUpper();
                         vocalCount = 0;
-                        for(int i = 0; i < Vocals.Length; i++)
+                        int i;
+                        for(i = 0; i < Vocals.Length; i++)
                         {
                             if (guessWord.Contains(Vocals[i]))
                             {
                                 vocalCount++;
                             }
                         }
-                    } while (vocalCount>maxVocalAllowed);
+                        found = false;
+                        i = 0;
+                        char[] aux = guessWord.ToCharArray();
+                        while (i < guessWord.Length && !found)
+                        {
+                            int checkLetter = guessWord[i];
+                            found = checkLetter < UTFAWord || checkLetter > UTFZWord;
+                            i++;
+                        }
+                    } while (vocalCount>maxVocalAllowed || found);
                     
                     attempts = hangmans.Length - attemptReducer;
                     showWords = new string(EmptyWords, guessWord.Length);
