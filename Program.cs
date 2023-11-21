@@ -1,7 +1,7 @@
 ﻿/*
  * Alumne: Gorriaran Caamaño Marcos
  * M03. Programacio UF1 
- * v1. 20/11/2023
+ * v1.2 21/11/2023
  * Proyect Hangman       
  */
 using System;
@@ -20,17 +20,20 @@ namespace HangingGame
             const string MainMenuOptions = "A. Facil\nB. Normal\nC. Dificil\nD. Experto\nE. Exit";
             const string MainMenuAskValue = "Elige una opcion: ";
             const string OptionOutsideRange = "La opcion seleccionada esta fuera del rango permitido";
+            const string ProvideHangmanText = "Necesito un texto que no tenga mas de {0} vocales diferentes: ";
+            const string WordHasTooManyVocals = "La palabra que ha seleccionado tiene {0} vocales diferentes y se esperaba que solo tuviera {1} vocal diferente";
             const string GameOptionOtusideRange = "La letra que ha seleccionado no esta dentro de la lista de caracteres posibles";
             const string CharacterAlreadyUsed = "La letra seleccionada ya ha sido utilizado";
             const string ShowLeftAttemtps = "Le queda {0} intentos";
             const string AskLetter = "Proporcioname con la letra que deseas probar: ";
             const string PlayerWins = "Has acertado la palabra, esta era: ";
             const string PlayerLoses = "No has conseguido acertar la palabra antes del limite de intentos, la palabra era: ";
+            const string Vocals = "AEIOU";
             const char EmptyWords = '_';
             const char LetterOptionSpliter = ' ';
             const char LineJumper = '\n', SectionSpliter = '-';
             const int Spliter = 2, UTFAWord = 65, UTFZWord = 90, ExitOption = 4, MinOption = 0, MaxOption = 4,EasyAttemptsReducer = 0,NormalAttemptsReducer = 2, HardAttemptsReducer = 3, ExpertAttemptsReducer = 4;
-            const int EasyMode = 0, NormalMode = 1, HardMode = 2, ExpertMode = 3, LetterOptionsJumpLineOn = 13;
+            const int EasyMode = 0, NormalMode = 1, HardMode = 2, ExpertMode = 3, LetterOptionsJumpLineOn = 13, EasyMaxVocals = 5, NormalMaxVocals = 4, HardMaxVocals = 3, ExpertMaxVocals = 2;
 
             string[] hangmanWords = {"DISCO","PERSONA","BIENVENIDA", "DESPROPORCIONAMENTE" };
             string[] hangmans = {"  +---+\n  |   |\n  O   |\n /|\\  |\n / \\  |\n      |\n=========",
@@ -44,7 +47,7 @@ namespace HangingGame
             string guessWord, showWords;
             char[] usedCharacters;
             char optionWord;
-            int option,gameOption, attemptReducer, attempts;
+            int option, gameOption, attemptReducer, attempts, vocalCount, maxVocalAllowed;
             bool repeat, found;
 
             Console.ForegroundColor = WelcomeColor;
@@ -80,15 +83,54 @@ namespace HangingGame
                 if (option != ExitOption)
                 {
                     //Seting Up the game
-                    attemptReducer = option switch
+                    switch (option)
                     {
-                        EasyMode => EasyAttemptsReducer,
-                        NormalMode => NormalAttemptsReducer,
-                        HardMode => HardAttemptsReducer,
-                        ExpertMode => ExpertAttemptsReducer,
-                    };
+                        case EasyMode:
+                            attemptReducer = EasyAttemptsReducer;
+                            maxVocalAllowed = EasyMaxVocals;
+                            break;
+                        case NormalMode:
+                            attemptReducer = NormalAttemptsReducer;
+                            maxVocalAllowed = NormalMaxVocals;
+                            break;
+                        case HardMode:
+                            attemptReducer = HardAttemptsReducer;
+                            maxVocalAllowed = HardMaxVocals;
+                            break;
+                        case ExpertMode:
+                            attemptReducer = ExpertAttemptsReducer;
+                            maxVocalAllowed = ExpertMaxVocals;
+                            break;
+                        default:
+                            attemptReducer = EasyAttemptsReducer;
+                            maxVocalAllowed = EasyMaxVocals; 
+                            break;
+                    }
+                    repeat = false;
+                    vocalCount = 0;
+                    Console.WriteLine(new string(SectionSpliter, Console.WindowWidth));
+                    do
+                    {
+                        if (repeat)
+                        {
+                            Console.ForegroundColor = ErrorColor;
+                            Console.WriteLine(WordHasTooManyVocals, vocalCount, maxVocalAllowed);
+                            Console.ResetColor();
+                        }
+                        repeat = true;
+                        Console.Write(ProvideHangmanText, maxVocalAllowed);
+                        guessWord = Console.ReadLine().Trim().ToUpper();
+                        vocalCount = 0;
+                        for(int i = 0; i < Vocals.Length; i++)
+                        {
+                            if (guessWord.Contains(Vocals[i]))
+                            {
+                                vocalCount++;
+                            }
+                        }
+                    } while (vocalCount>maxVocalAllowed);
+                    
                     attempts = hangmans.Length - attemptReducer;
-                    guessWord = hangmanWords[option];
                     showWords = new string(EmptyWords, guessWord.Length);
                     usedCharacters = new char[0];
                     //The game
