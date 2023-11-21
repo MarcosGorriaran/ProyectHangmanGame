@@ -24,7 +24,6 @@ namespace HangingGame
             const string CharacterAlreadyUsed = "La letra seleccionada ya ha sido utilizado";
             const string ShowLeftAttemtps = "Le queda {0} intentos";
             const string AskLetter = "Proporcioname con la letra que deseas probar: ";
-            const string LetterOptions = "ABCDEFGHIJKLMNOPKRSTWXYZ";
             const string PlayerWins = "Has acertado la palabra, esta era: ";
             const string PlayerLoses = "No has conseguido acertar la palabra antes del limite de intentos, la palabra era: ";
             const char EmptyWords = '_';
@@ -98,21 +97,22 @@ namespace HangingGame
                         Console.WriteLine(new string(SectionSpliter, Console.WindowWidth));
                         Console.WriteLine(ShowLeftAttemtps, attempts);
                         //Building Keyboard
-                        for (int i = 0; i < LetterOptions.Length; i++)
+                        for (int i = UTFAWord; i <= UTFZWord; i++)
                         {
+                            char singleAux = Convert.ToChar(i);
                             int j = 0;
                             found = false;
                             while(j < usedCharacters.Length && !found)
                             {
-                                found = usedCharacters[j] == LetterOptions[i];
+                                found = usedCharacters[j] == singleAux;
                                 j++;
                             }
                             if (found)
                             {
-                                Console.BackgroundColor = guessWord.Contains(LetterOptions[i]) ? CorrectBackground : WrongBackground;
+                                Console.BackgroundColor = guessWord.Contains(singleAux) ? CorrectBackground : WrongBackground;
                                 Console.ForegroundColor = BlackForWhiteBackground;
                             }
-                            Console.Write(LetterOptions[i]);
+                            Console.Write(singleAux);
                             Console.ResetColor();
                             Console.Write(LetterOptionSpliter);
                             if ((i+1)%LetterOptionsJumpLineOn==0)
